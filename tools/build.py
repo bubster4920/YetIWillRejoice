@@ -41,6 +41,17 @@ SOCIAL = [
 START_HERE = ["ome3eGuhMhY", "aYvLZUP68V0", "IG2kkExMWT8", "afMlbS0lxIU"]
 HOST = "Brandon Anderson"
 
+GA_ID = "G-BK0FDPSMBH"
+ANALYTICS = f"""<script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){{dataLayer.push(arguments);}}
+gtag('consent', 'default', {{ analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', wait_for_update: 500 }});
+try {{ if (localStorage.getItem('yiwr-consent') === 'granted') gtag('consent', 'update', {{ analytics_storage: 'granted' }}); }} catch (e) {{}}
+gtag('js', new Date());
+gtag('config', '{GA_ID}', {{ allow_google_signals: false, allow_ad_personalization_signals: false }});
+</script>"""
+
 esc = html.escape
 PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>'
 
@@ -229,6 +240,7 @@ def page(root, path, title, description, body, nav="", og_image=None, jsonld=Non
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
 <link rel="stylesheet" href="{root}assets/css/site.css?v={css}">
+{ANALYTICS}
 {ld}
 </head>
 <body class="{page_class}">
@@ -274,6 +286,7 @@ def page(root, path, title, description, body, nav="", og_image=None, jsonld=Non
   <div class="wrap foot-base">
     <p>A podcast from <a href="{DARE}" target="_blank" rel="noopener">Dare Ministries</a>, Colorado Springs.</p>
     <p>“Yet I will rejoice in the Lord.” Habakkuk 3:18</p>
+    <p><a href="{link(root, 'privacy/')}">Privacy</a> · <a href="#cookie-settings" data-cookie-settings>Cookie settings</a></p>
   </div>
 </footer>
 <script src="{root}assets/js/site.js?v={js}" defer></script>
@@ -584,6 +597,31 @@ def ask_page():
                 body, nav="ask")
 
 
+def privacy_page():
+    root = "../"
+    body = f"""
+<section class="page-head">
+  <div class="wrap">
+    <h1>Privacy</h1>
+    <p class="lede">How Yet I Will Rejoice handles the information you share with us.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="wrap narrow prose">
+    <h2>Analytics</h2>
+    <p>We use Google Analytics to understand, in aggregate, how people find and use this site, such as which episodes are viewed and roughly what region visitors come from. Analytics cookies are off until you click Accept on the cookie banner. You can change your choice any time with the Cookie settings link in the footer. If you accept, Google Analytics receives your IP address and basic device and browser information. We have turned off Google’s advertising features and data sharing. You can also opt out with Google’s browser add-on at tools.google.com/dlpage/gaoptout.</p>
+    <h2>Questions you send us</h2>
+    <p>The “Ask a question” form is a Google Form. What you submit, including any name or email address you choose to include, is stored by Google and seen only by our team. We use it to read your question and, if you ask, to reply. We do not sell or rent your information.</p>
+    <h2>Videos and giving</h2>
+    <p>Episodes are played through YouTube. Giving is handled by Dare Ministries through Breeze ChMS. Those services have their own privacy practices.</p>
+    <h2>Contact</h2>
+    <p>Questions about this page? Use the <a href="{link(root, 'ask/')}">Ask a question</a> form.</p>
+  </div>
+</section>
+"""
+    return page(root, "privacy/", "Privacy", "How Yet I Will Rejoice handles the information you share with us.", body)
+
+
 def links_page(eps):
     """Link-in-bio page for Instagram and TikTok profiles, in place of Linktree."""
     root = "../"
@@ -617,6 +655,7 @@ def links_page(eps):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap">
 <link rel="stylesheet" href="{root}assets/css/site.css?v={css}">
+{ANALYTICS}
 </head>
 <body class="links-page">
 <main class="links">
@@ -624,8 +663,9 @@ def links_page(eps):
   <h1>Hard questions. Honest answers.</h1>
   <p>A weekly podcast with {HOST}, answering life’s hardest questions from Scripture.</p>
   <ul>{items}</ul>
-  <p class="links-foot"><a href="{link(root, '')}">yetiwillrejoice.org</a> · A podcast from <a href="{DARE}" target="_blank" rel="noopener">Dare Ministries</a></p>
+  <p class="links-foot"><a href="{link(root, '')}">yetiwillrejoice.org</a> · A podcast from <a href="{DARE}" target="_blank" rel="noopener">Dare Ministries</a> · <a href="{link(root, 'privacy/')}">Privacy</a> · <a href="#cookie-settings" data-cookie-settings>Cookie settings</a></p>
 </main>
+<script src="{root}assets/js/site.js?v={asset_hash('assets/js/site.js')}" defer></script>
 </body>
 </html>
 """
@@ -665,8 +705,9 @@ def main():
     write("about/index.html", about_page())
     write("ask/index.html", ask_page())
     write("links/index.html", links_page(eps))
+    write("privacy/index.html", privacy_page())
     write("404.html", not_found())
-    urls = ["", "episodes/", "about/", "ask/"] + [f"episodes/{e['slug']}/" for e in eps]
+    urls = ["", "episodes/", "about/", "ask/", "privacy/"] + [f"episodes/{e['slug']}/" for e in eps]
     write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + "".join(f"  <url><loc>{SITE_URL}/{u}</loc></url>\n" for u in urls) + "</urlset>\n")
     write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
