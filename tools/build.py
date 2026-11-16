@@ -241,6 +241,7 @@ def page(root, path, title, description, body, nav="", og_image=None, jsonld=Non
       {nl('episodes', 'Episodes', link(root, 'episodes/'))}
       {nl('about', 'About', link(root, 'about/'))}
       {nl('ask', 'Ask a question', link(root, 'ask/'))}
+      <a class="btn btn-small btn-accent" href="{GIVE}" target="_blank" rel="noopener">Give<span class="visually-hidden"> to Yet I Will Rejoice (opens in a new tab)</span></a>
       <a class="btn btn-small btn-light" href="#subscribe">Subscribe</a>
     </nav>
   </div>
@@ -261,7 +262,7 @@ def page(root, path, title, description, body, nav="", og_image=None, jsonld=Non
         <li><a href="{link(root, 'episodes/')}">All episodes</a></li>
         <li><a href="{link(root, 'about/')}">About the show</a></li>
         <li><a href="{link(root, 'ask/')}">Ask a question</a></li>
-        <li><a href="{GIVE}" target="_blank" rel="noopener">Support the show</a></li>
+        <li><a href="{GIVE}" target="_blank" rel="noopener">Give to Yet I Will Rejoice</a></li>
         <li><a href="{link(root, 'links/')}">All our links</a></li>
       </ul>
     </div>
