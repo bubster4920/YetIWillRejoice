@@ -381,7 +381,7 @@ def home(eps, series):
 
 <section class="section host" aria-labelledby="host-title">
   <div class="wrap host-grid">
-    <img class="host-photo" src="assets/img/brandon.jpg" alt="{HOST}" width="250" height="374" loading="lazy">
+    <img class="host-photo" src="assets/img/brandon.jpg" alt="{HOST}" width="640" height="800" loading="lazy">
     <div>
       <h2 id="host-title">Hosted by {HOST}, with a different friend at the table each week.</h2>
       <p>Brandon founded Dare Ministries in 2015 to prepare young believers for a lifetime of ministry. He is a youth pastor, leads a college ministry, and has spent years fielding the questions students are afraid to ask out loud. Yet I Will Rejoice is where he answers them.</p>
@@ -547,7 +547,7 @@ def about_page():
 </section>
 <section class="section host" aria-labelledby="host-title">
   <div class="wrap host-grid">
-    <img class="host-photo" src="{root}assets/img/brandon.jpg" alt="{HOST}" width="250" height="374" loading="lazy">
+    <img class="host-photo" src="{root}assets/img/brandon.jpg" alt="{HOST}" width="640" height="800" loading="lazy">
     <div>
       <h2 id="host-title">Meet your host</h2>
       <p>{HOST} founded Dare Ministries in 2015 to prepare young believers for a lifetime of ministry and to unite the body of Christ through partnerships on youth conferences. A 2016 Bob Jones University history graduate, he serves as a youth pastor and outreach director at a local church and leads a college ministry.</p>
