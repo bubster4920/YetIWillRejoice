@@ -27,6 +27,27 @@
     });
   });
 
+  // Conversion events for Google Analytics (sent only if the visitor accepted analytics cookies; consent is handled in the gtag setup).
+  function track(name, params) {
+    try { if (typeof window.gtag === "function") window.gtag("event", name, params || {}); } catch (e) {}
+  }
+  document.querySelectorAll(".video[data-youtube] button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var box = b.parentElement;
+      track("video_play", { video_id: box && box.dataset ? box.dataset.youtube : "", page_path: location.pathname });
+    });
+  });
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a[href]");
+    if (!a) return;
+    var h = a.getAttribute("href") || "";
+    if (/^https?:\/\/(www\.)?youtube\.com\/watch|^https?:\/\/youtu\.be\//.test(h)) {
+      track("watch_on_youtube", { link_url: h, page_path: location.pathname });
+    } else if (/podcasts\.apple\.com|spotify\.com/.test(h)) {
+      track("podcast_link_click", { link_url: h, page_path: location.pathname });
+    }
+  });
+
   // Episode library: search + series filter, with the series kept in the URL hash.
   var lib = document.querySelector("[data-library]");
   if (lib) {
