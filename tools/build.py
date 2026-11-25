@@ -20,7 +20,8 @@ PREVIEW = "--preview" in sys.argv
 
 FORM = "https://docs.google.com/forms/d/e/1FAIpQLSdp9v20gyJ-YPRBo8-JA6z_umQGF9Grcw8mrs4m2gZ3MpXygQ/viewform"
 GIVE = "https://dareministries.breezechms.com/give/online?fund_id=1871299"
-DARE = "https://www.dareministries.com/"
+DARE = "https://dareministries.org/"
+DARE_PAGE = "https://dareministries.org/ministries/podcast/"
 YOUTUBE = "https://www.youtube.com/@YetIWillRejoice"
 YOUTUBE_SUB = "https://www.youtube.com/@YetIWillRejoice?sub_confirmation=1"
 PLATFORMS = [
@@ -338,7 +339,7 @@ def page(root, path, title, description, body, nav="", og_image=None, jsonld=Non
     </div>
   </div>
   <div class="wrap foot-base">
-    <p>A podcast from <a href="{DARE}" target="_blank" rel="noopener">Dare Ministries</a>, Colorado Springs.</p>
+    <p><em>Yet I Will Rejoice</em> is a ministry of <a href="{DARE}" target="_blank" rel="noopener">Dare Ministries</a> in Colorado Springs. <a href="{DARE_PAGE}" target="_blank" rel="noopener">See our page on dareministries.org</a>.</p>
     <p>“Yet I will rejoice in the Lord.” Habakkuk 3:18</p>
     <p><a href="{link(root, 'privacy/')}">Privacy</a> · <a href="#cookie-settings" data-cookie-settings>Cookie settings</a></p>
   </div>
@@ -768,7 +769,7 @@ def about_page():
 </section>
 <section class="section dare">
   <div class="wrap narrow dare-note">
-    <p><em>Yet I Will Rejoice</em> is a podcast from <a href="{DARE}" target="_blank" rel="noopener">Dare Ministries</a>, which equips young believers through conferences, college ministry and missions. If the show has helped you, you can <a href="{GIVE}" target="_blank" rel="noopener">support it here</a>.</p>
+    <p><em>Yet I Will Rejoice</em> is a ministry of <a href="{DARE}" target="_blank" rel="noopener">Dare Ministries</a> (<a href="{DARE_PAGE}" target="_blank" rel="noopener">our page on dareministries.org</a>), which equips young believers through conferences, college ministry and missions. If the show has helped you, you can <a href="{GIVE}" target="_blank" rel="noopener">support it here</a>.</p>
   </div>
 </section>
 {ask_band(root)}
