@@ -96,6 +96,8 @@ def load():
         seen.add(slug)
         e["slug"] = e.get("slug") or slug
         e["series_name"] = series[e["series"]]["name"] if e.get("series") in series else ""
+        tp = ROOT / "data" / "transcripts" / f"{e['youtube']}.txt"
+        e["transcript"] = tp.read_text().strip() if tp.exists() else ""
     # Newest first: by date when known, then by episode number.
     eps.sort(key=lambda e: (e.get("date") or "", e.get("number") or 0), reverse=True)
     for s in series.values():
@@ -120,12 +122,55 @@ def ep_meta(e, with_series=True):
     return " · ".join(esc(b) for b in bits)
 
 
+def fmt_ts(sec):
+    h, rem = divmod(int(sec), 3600)
+    m, s = divmod(rem, 60)
+    return f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
+
+
+def parse_description(e):
+    """Split a YouTube description into its summary, chapters, scripture list and mentioned links."""
+    out = {"summary_text": [], "chapters": [], "scripture": [], "mentioned": []}
+    section = None
+    for ln in (e.get("description") or "").splitlines():
+        s = ln.strip()
+        if s.startswith("⏱"):
+            section = "chapters"
+            continue
+        if s.startswith("\U0001F4D6"):
+            section = "scripture"
+            continue
+        if s.startswith("\U0001F517"):
+            section = "mentioned"
+            continue
+        if re.match(r"^(❓|\U0001F4F2|\U0001F49B|✨)", s) or s.startswith("-----"):
+            section = "other"
+            continue
+        if section is None and re.match(r"^(?:\d+:)?\d{1,2}:\d{2}\s+\S", s):
+            section = "chapters"
+        if section is None:
+            out["summary_text"].append(ln)
+        elif section == "chapters":
+            m = re.match(r"^(?:(\d+):)?(\d{1,2}):(\d{2})\s+(.+)$", s)
+            if m:
+                h, mi, se, label = m.groups()
+                out["chapters"].append((int(h or 0) * 3600 + int(mi) * 60 + int(se), label.strip()))
+        elif section == "scripture" and s:
+            out["scripture"] += [r.strip() for r in s.split("•") if r.strip()]
+        elif section == "mentioned" and s.startswith("•"):
+            m = re.match(r"^•\s*(.+?)\s+-\s+(https?://\S+)$", s)
+            if m:
+                out["mentioned"].append((m.group(1), m.group(2)))
+    out["summary_text"] = "\n".join(out["summary_text"])
+    return out
+
+
 BOILERPLATE = re.compile(r"^\s*(to ask a question|follow us|listen to yet i will rejoice|support (us|the show)|give to|subscribe|meet our team|our vision|scripture (taken|quotations))", re.I)
 
 
 def description_paras(e):
     """The YouTube description in paragraphs, minus hashtags and the standard follow/listen footer."""
-    lines = [ln for ln in (e.get("description") or "").splitlines() if not re.fullmatch(r"\s*(#\w+\s*)+", ln)]
+    lines = [ln for ln in parse_description(e)["summary_text"].splitlines() if not re.fullmatch(r"\s*(#\w+\s*)+", ln)]
     paras = [p.strip() for p in re.split(r"\n\s*\n", "\n".join(lines)) if p.strip()]
     return [p for p in paras if not BOILERPLATE.match(p)]
 
@@ -149,6 +194,11 @@ def description_html(e):
 
 
 def excerpt(e, n=180):
+    if e.get("meta") and n <= 200:
+        return e["meta"]
+    if e.get("summary"):
+        text = re.sub(r"\s+", " ", e["summary"]).strip()
+        return text if len(text) <= n else text[: n].rsplit(" ", 1)[0] + "…"
     paras = description_paras(e)
     text = re.sub(r"https?://\S+", "", paras[0]).replace("\n", " ").strip() if paras else ""
     if not text and e.get("guest"):
@@ -171,7 +221,7 @@ def card(e, root, extra_class=""):
 def video(e, eager=False):
     return f"""<div class="video" data-youtube="{e['youtube']}">
   <button type="button" aria-label="Play {esc(e['title'])}">
-    <img src="{thumb(e, 'maxresdefault' if eager else 'hqdefault')}" onerror="this.onerror=null;this.src='{thumb(e)}'" alt="" {'' if eager else 'loading="lazy"'}>
+    <img src="{thumb(e, 'maxresdefault' if eager else 'hqdefault')}" onerror="this.onerror=null;this.src='{thumb(e)}'" alt="Thumbnail for {esc(e['title'])}" {'' if eager else 'loading="lazy"'}>
     <span class="play">{PLAY}</span>
   </button>
 </div>"""
@@ -206,7 +256,7 @@ def ask_band(root):
 </section>"""
 
 
-def page(root, path, title, description, body, nav="", og_image=None, jsonld=None, page_class=""):
+def page(root, path, title, description, body, nav="", og_image=None, jsonld=None, page_class="", og_type="website"):
     full_title = title if title.startswith("Yet I Will Rejoice") else f"{title} · Yet I Will Rejoice"
     canonical = f"{SITE_URL}/{path}"
     og_image = og_image or f"{SITE_URL}/assets/img/og.png"
@@ -216,7 +266,7 @@ def page(root, path, title, description, body, nav="", og_image=None, jsonld=Non
         cur = ' aria-current="page"' if nav == key else ""
         return f'<a href="{href}"{cur}>{label}</a>'
 
-    ld = f'<script type="application/ld+json">{json.dumps(jsonld, ensure_ascii=False)}</script>' if jsonld else ""
+    ld = f'<script type="application/ld+json">{json.dumps(jsonld, ensure_ascii=False).replace('</', '<\\/')}</script>' if jsonld else ""
     socials = "".join(f'<li><a href="{u}" target="_blank" rel="noopener">{n}</a></li>' for n, u in SOCIAL)
     return f"""<!doctype html>
 <html lang="en">
@@ -226,7 +276,7 @@ def page(root, path, title, description, body, nav="", og_image=None, jsonld=Non
 <title>{esc(full_title)}</title>
 <meta name="description" content="{esc(description)}">
 <link rel="canonical" href="{canonical}">
-<meta property="og:type" content="website">
+<meta property="og:type" content="{og_type}">
 <meta property="og:site_name" content="Yet I Will Rejoice">
 <meta property="og:title" content="{esc(full_title)}">
 <meta property="og:description" content="{esc(description)}">
@@ -250,6 +300,7 @@ def page(root, path, title, description, body, nav="", og_image=None, jsonld=Non
     <a class="brand" href="{link(root, '')}" aria-label="Yet I Will Rejoice home"><img src="{root}assets/img/logo-318-white.png" alt="" width="837" height="757"><span>Yet I Will Rejoice</span></a>
     <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
     <nav id="site-nav" class="site-nav" aria-label="Main">
+      {nl('start', 'Start here', link(root, 'start/'))}
       {nl('episodes', 'Episodes', link(root, 'episodes/'))}
       {nl('about', 'About', link(root, 'about/'))}
       {nl('ask', 'Ask a question', link(root, 'ask/'))}
@@ -271,6 +322,7 @@ def page(root, path, title, description, body, nav="", og_image=None, jsonld=Non
     <div>
       <h2>Explore</h2>
       <ul>
+        <li><a href="{link(root, 'start/')}">Start here</a></li>
         <li><a href="{link(root, 'episodes/')}">All episodes</a></li>
         <li><a href="{link(root, 'about/')}">About the show</a></li>
         <li><a href="{link(root, 'ask/')}">Ask a question</a></li>
@@ -348,6 +400,7 @@ def home(eps, series):
     <div>
       <h2 id="start-title">New here? Start with these four.</h2>
       <p class="lede">Where the show begins, and the questions people bring to it most.</p>
+      <p><a class="text-link" href="{link(root, 'start/')}">See the full Start Here guide</a></p>
     </div>
     <ol class="start-list">{start_cards}</ol>
   </div>
@@ -432,6 +485,137 @@ def episodes_page(eps, series):
                 body, nav="episodes")
 
 
+def summary_html(e):
+    if e.get("summary"):
+        body = "\n".join(f"<p>{esc(p)}</p>" for p in e["summary"].split("\n\n"))
+    else:
+        body = description_html(e)
+    return f"<h2>About this episode</h2>\n{body}"
+
+
+def transcript_paras(text):
+    paras, cur = [], []
+    for w in text.split():
+        cur.append(w)
+        if (len(cur) >= 90 and re.search(r"[.?!][\"”]?$", w)) or len(cur) >= 140:
+            paras.append(" ".join(cur))
+            cur = []
+    if cur:
+        paras.append(" ".join(cur))
+    return paras
+
+
+def extra_sections(e, eps, root):
+    p = parse_description(e)
+    by_id = {x["youtube"]: x for x in eps}
+    out = []
+    if e.get("key_points"):
+        items = "".join(f"<li>{esc(k)}</li>" for k in e["key_points"])
+        out.append(f'<section class="ep-sec"><h2>Key takeaways</h2><ul>{items}</ul></section>')
+    if p["chapters"]:
+        items = "".join(
+            f'<li><a href="https://youtu.be/{e["youtube"]}?t={s}" target="_blank" rel="noopener"><span class="ts">{fmt_ts(s)}</span> {esc(lab)}</a></li>'
+            for s, lab in p["chapters"]
+        )
+        out.append(f'<section class="ep-sec"><h2>Chapters</h2><ol class="chapters">{items}</ol></section>')
+    scripts = e.get("scriptures") or p["scripture"]
+    if scripts:
+        items = "".join(f"<li>{esc(s)}</li>" for s in scripts)
+        out.append(f'<section class="ep-sec"><h2>Scripture in this episode</h2><ul class="scripture">{items}</ul></section>')
+    if p["mentioned"]:
+        items = ""
+        for label, url in p["mentioned"]:
+            m = re.search(r"(?:youtu\.be/|v=)([\w-]{11})", url)
+            t = by_id.get(m.group(1)) if m else None
+            if t:
+                items += '<li><a href="' + link(root, "episodes/" + t["slug"] + "/") + '">' + esc(t["title"]) + "</a></li>"
+            else:
+                items += '<li><a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(label) + "</a></li>"
+        out.append(f'<section class="ep-sec"><h2>Mentioned in this episode</h2><ul>{items}</ul></section>')
+    if e.get("transcript"):
+        paras = "".join(f"<p>{esc(x)}</p>" for x in transcript_paras(e["transcript"]))
+        out.append(
+            '<section class="ep-sec"><details class="transcript"><summary><h2>Read the transcript</h2></summary>'
+            '<p class="note">Auto-generated from the video’s captions, so it may contain small errors.</p>'
+            f"{paras}</details></section>"
+        )
+    return "\n".join(out)
+
+
+START_REASONS = {
+    "ome3eGuhMhY": "Meet the show and the verse behind the name, Habakkuk 3:17–18.",
+    "aYvLZUP68V0": "The question most people start with, answered from Scripture.",
+    "IG2kkExMWT8": "Who Jesus claimed to be, and why that changes everything.",
+    "afMlbS0lxIU": "The good news at the center of the Christian faith, start to finish.",
+}
+NEXT_STEPS = ["AOiFUaNPYeI", "643_sa-Vz34", "NoeyJIJOX4s", "v9kzU80togc", "iU_38JK5stY"]
+TOPICS = [
+    ("sin", "Is it a sin?", "Straight answers on lying, alcohol, dancing, tattoos and more."),
+    ("apologetics", "Hard questions about God", "Suffering, Jesus, truth and the objections people raise."),
+    ("living", "Living out your faith", "Prayer, church, Bible reading and sharing the gospel."),
+    ("live", "Live Q&A", "Bring a question and hear it answered on the spot."),
+    ("guest", "Guest conversations", "Friends of the show on calling, mission and ministry."),
+]
+
+
+def start_page(eps, series):
+    root = "../"
+    by_id = {e["youtube"]: e for e in eps}
+    steps = [by_id[i] for i in START_HERE if i in by_id]
+    nxt = [by_id[i] for i in NEXT_STEPS if i in by_id]
+    step_items = "".join(
+        f'<li><a href="{link(root, "episodes/" + e["slug"] + "/")}"><span class="n">{i}</span><span class="t">{esc(e["title"])}</span>'
+        f'<span class="m">{esc(START_REASONS.get(e["youtube"], ""))}</span></a></li>'
+        for i, e in enumerate(steps, 1)
+    )
+    topic_cards = "".join(
+        f'<a class="series-card" href="{link(root, "episodes/")}#{k}"><span class="series-name">{esc(n)}</span>'
+        f'<span class="series-blurb">{esc(b)}</span></a>'
+        for k, n, b in TOPICS if k in series
+    )
+    body = f"""
+<section class="page-head">
+  <div class="wrap narrow">
+    <h1>New here? Start here.</h1>
+    <p class="lede">Yet I Will Rejoice answers life’s hardest questions from the Bible, one short episode at a time. If you’re not sure where to begin, begin with these four.</p>
+    <div class="btn-row"><a class="btn btn-accent" href="{YOUTUBE_SUB}" target="_blank" rel="noopener">Subscribe on YouTube</a><a class="btn btn-ghost" href="{link(root, "ask/")}">Ask a question</a></div>
+  </div>
+</section>
+<section class="section start" aria-labelledby="path-title">
+  <div class="wrap start-grid">
+    <div>
+      <h2 id="path-title">The first four</h2>
+      <p class="lede">Watch them in order. Each one builds on the one before it.</p>
+    </div>
+    <ol class="start-list">{step_items}</ol>
+  </div>
+</section>
+<section class="section" aria-labelledby="next-title">
+  <div class="wrap">
+    <h2 id="next-title">Then keep going</h2>
+    <div class="ep-grid">{"".join(card(e, root) for e in nxt)}</div>
+  </div>
+</section>
+<section class="section series-sec" aria-labelledby="topics-title">
+  <div class="wrap">
+    <h2 id="topics-title">Or start with your own question</h2>
+    <div class="series-grid">{topic_cards}</div>
+  </div>
+</section>
+{ask_band(root)}
+"""
+    ld = {
+        "@context": "https://schema.org", "@type": "CollectionPage", "name": "Start here: Yet I Will Rejoice",
+        "url": SITE_URL + "/start/",
+        "mainEntity": {"@type": "ItemList", "itemListElement": [
+            {"@type": "ListItem", "position": i, "url": f"{SITE_URL}/episodes/{e['slug']}/", "name": e["title"]}
+            for i, e in enumerate(steps + nxt, 1)]},
+    }
+    return page(root, "start/", "Start here: new to Yet I Will Rejoice?",
+                "New to Yet I Will Rejoice? Start with these four episodes on suffering, Jesus and the gospel, then browse by the question you are asking.",
+                body, nav="start", jsonld=ld)
+
+
 def episode_page(e, eps, series):
     root = "../../"
     url = f"{SITE_URL}/episodes/{e['slug']}/"
@@ -474,7 +658,8 @@ def episode_page(e, eps, series):
         {platform_list("platforms compact")}
       </details>
     </div>
-    <div class="prose">{description_html(e)}</div>
+    <div class="prose">{summary_html(e)}</div>
+    {extra_sections(e, eps, root)}
     <div class="share" data-share data-url="{url}" data-title="{esc(share_text)}">
       <h2>Know someone asking this?</h2>
       <div class="share-row">
@@ -507,8 +692,20 @@ def episode_page(e, eps, series):
     if e.get("date"):
         ld["datePublished"] = e["date"]
         ld["associatedMedia"]["uploadDate"] = e["date"]
+    pd = parse_description(e)
+    if e.get("transcript"):
+        ld["associatedMedia"]["transcript"] = e["transcript"]
+    if pd["chapters"]:
+        ch = pd["chapters"]
+        clips = []
+        for i, (s, lab) in enumerate(ch):
+            clip = {"@type": "Clip", "name": lab, "startOffset": s, "url": f"https://youtu.be/{e['youtube']}?t={s}"}
+            if i + 1 < len(ch):
+                clip["endOffset"] = ch[i + 1][0]
+            clips.append(clip)
+        ld["associatedMedia"]["hasPart"] = clips
     return page(root, f"episodes/{e['slug']}/", e["title"], excerpt(e, 155), body, nav="episodes",
-                og_image=thumb(e, "maxresdefault"), jsonld=ld)
+                og_image=thumb(e, "maxresdefault"), jsonld=ld, og_type="article")
 
 
 def about_page():
@@ -628,6 +825,7 @@ def links_page(eps):
     latest = next(e for e in eps if e.get("series") != "live")
     rows = [
         ("Newest episode: " + latest["title"], link(root, f"episodes/{latest['slug']}/"), "feature"),
+        ("New here? Start here", link(root, "start/"), ""),
         ("Ask a question", link(root, "ask/"), ""),
         ("Browse every episode", link(root, "episodes/"), ""),
     ] + [(f"Listen on {n}" if n != "YouTube" else "Subscribe on YouTube", u, "") for n, u in PLATFORMS] + [
@@ -702,12 +900,13 @@ def main():
     write("episodes/index.html", episodes_page(eps, series))
     for e in eps:
         write(f"episodes/{e['slug']}/index.html", episode_page(e, eps, series))
+    write("start/index.html", start_page(eps, series))
     write("about/index.html", about_page())
     write("ask/index.html", ask_page())
     write("links/index.html", links_page(eps))
     write("privacy/index.html", privacy_page())
     write("404.html", not_found())
-    urls = ["", "episodes/", "about/", "ask/", "privacy/"] + [f"episodes/{e['slug']}/" for e in eps]
+    urls = ["", "start/", "episodes/", "about/", "ask/", "privacy/"] + [f"episodes/{e['slug']}/" for e in eps]
     write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + "".join(f"  <url><loc>{SITE_URL}/{u}</loc></url>\n" for u in urls) + "</urlset>\n")
     write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")

@@ -337,3 +337,23 @@ p:last-child { margin-bottom: 0; }
 .consent-banner a { color: var(--accent); }
 .consent-actions { display: flex; gap: 10px; }
 .consent-banner .btn-ghost-dark { color: var(--on-dark); border-color: var(--on-dark-muted); }
+
+/* episode extras: takeaways, chapters, scripture, transcript */
+.ep-sec { margin-top: 44px; }
+.ep-sec h2, .prose h2 { font-size: 1.5rem; font-weight: 400; margin: 0 0 14px; }
+.ep-sec ul, .ep-sec ol { padding-left: 1.2em; font-size: 1.15rem; line-height: 1.6; }
+.ep-sec li { margin: .45em 0; }
+.ep-sec .chapters { list-style: none; padding-left: 0; }
+.chapters a { text-decoration: none; color: var(--text); }
+.chapters a:hover { text-decoration: underline; }
+.chapters .ts { display: inline-block; min-width: 3.8em; font-variant-numeric: tabular-nums; color: var(--accent-ink); font-weight: 500; }
+.ep-sec .scripture { list-style: none; padding-left: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.scripture li { margin: 0; border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; font-size: 1rem; }
+.transcript summary { cursor: pointer; list-style: none; }
+.transcript summary::-webkit-details-marker { display: none; }
+.transcript summary h2 { display: inline; margin: 0; }
+.transcript summary::after { content: " +"; font-size: 1.5rem; }
+.transcript[open] summary::after { content: " \2013"; }
+.transcript .note { color: var(--muted); font-size: .95rem; margin-top: 14px; }
+.transcript p { font-size: 1.05rem; line-height: 1.75; }
+.start-list .r, .start-list .m { display: block; }
