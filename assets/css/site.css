@@ -357,3 +357,11 @@ p:last-child { margin-bottom: 0; }
 .transcript .note { color: var(--muted); font-size: .95rem; margin-top: 14px; }
 .transcript p { font-size: 1.05rem; line-height: 1.75; }
 .start-list .r, .start-list .m { display: block; }
+
+/* ------------------------------------------------ email signup (in the subscribe band) */
+.news-form { margin-top: 22px; max-width: 460px; }
+.news-form label { display: block; font-weight: 600; margin-bottom: 8px; }
+.news-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.news-row input[type=email] { flex: 1 1 220px; min-width: 0; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--ink-3); background: var(--paper); color: var(--ink); font: inherit; }
+.news-note { margin: 8px 0 0; font-size: .85rem; opacity: .8; }
+.news-ok { margin: 10px 0 0; font-weight: 600; }

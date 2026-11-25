@@ -48,6 +48,46 @@
     }
   });
 
+  // Email signup: posts to Mailchimp (JSONP, so no server is needed) and shows the result in place.
+  // Without JavaScript the form still submits to Mailchimp in a new tab.
+  var mc = document.querySelector("[data-mailchimp-form]");
+  if (mc) {
+    mc.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!mc.reportValidity()) return;
+      var note = mc.querySelector("[data-form-ok]");
+      var btn = mc.querySelector("button[type=submit]");
+      var params = [];
+      new FormData(mc).forEach(function (v, k) { params.push(encodeURIComponent(k) + "=" + encodeURIComponent(v)); });
+      var cb = "mcCallback" + Date.now();
+      var script = document.createElement("script");
+      var done = false;
+      function finish(msg) {
+        if (done) return;
+        done = true;
+        delete window[cb];
+        script.remove();
+        if (btn) btn.disabled = false;
+        if (note) { note.hidden = false; note.textContent = msg; }
+      }
+      window[cb] = function (res) {
+        if (res && res.result === "success") {
+          mc.reset();
+          track("newsletter_signup", { page_path: location.pathname });
+          finish("Thank you! Check your email and confirm your subscription to finish signing up.");
+        } else {
+          var msg = (res && res.msg ? String(res.msg) : "").replace(/<[^>]*>/g, "").replace(/^\d+\s*-\s*/, "");
+          finish(msg || "Something went wrong. Please try again.");
+        }
+      };
+      script.onerror = function () { finish("Something went wrong. Please try again."); };
+      setTimeout(function () { finish("Something went wrong. Please try again."); }, 15000);
+      if (btn) btn.disabled = true;
+      script.src = mc.action.replace("/subscribe/post", "/subscribe/post-json") + "&" + params.join("&") + "&c=" + cb;
+      document.body.appendChild(script);
+    });
+  }
+
   // Episode library: search + series filter, with the series kept in the URL hash.
   var lib = document.querySelector("[data-library]");
   if (lib) {

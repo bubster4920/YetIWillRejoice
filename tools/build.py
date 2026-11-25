@@ -235,12 +235,29 @@ def platform_list(cls="platforms"):
     return f'<ul class="{cls}">{items}</ul>'
 
 
+# Mailchimp signup (Dare Ministries audience). The tag keeps these subscribers separate from the other lists.
+MC_ACTION = "https://dareministries.us11.list-manage.com/subscribe/post?u=7815c84e349b69a1d9ff1e6c3&amp;id=f63a27c3af&amp;f_id=00dbc4e3f0"
+MC_TAG = "10289769"
+MC_BOT = "b_7815c84e349b69a1d9ff1e6c3_f63a27c3af"
+
+
 def subscribe_band(root):
     return f"""<section class="subscribe" id="subscribe" aria-labelledby="sub-title">
   <div class="wrap sub-grid">
     <div>
       <h2 id="sub-title">Never miss an episode.</h2>
       <p>New episodes most weeks. Follow on the app you already use and the next one will find you.</p>
+      <form class="news-form" data-mailchimp-form action="{MC_ACTION}" method="post" target="_blank" novalidate>
+        <label for="news-email">Or get new episodes by email</label>
+        <div class="news-row">
+          <input id="news-email" name="EMAIL" type="email" autocomplete="email" placeholder="Your email address" required>
+          <input type="hidden" name="tags" value="{MC_TAG}">
+          <div aria-hidden="true" style="position:absolute;left:-5000px"><input type="text" name="{MC_BOT}" tabindex="-1" value=""></div>
+          <button class="btn btn-accent" type="submit">Sign up</button>
+        </div>
+        <p class="news-note">Only Yet I Will Rejoice updates. Unsubscribe any time.</p>
+        <p class="news-ok" data-form-ok hidden role="status"></p>
+      </form>
     </div>
     {platform_list()}
   </div>
@@ -818,6 +835,7 @@ def privacy_page():
     <h2>Videos and giving</h2>
     <p>Episodes are played through YouTube. Giving is handled by Dare Ministries through Breeze ChMS. Those services have their own privacy practices.</p>
     <h2>Contact</h2>
+    <p>If you sign up for email updates, we store your email address with Mailchimp and use it only to send Yet I Will Rejoice updates. Every email has an unsubscribe link.</p>
     <p>Questions about this page? Use the <a href="{link(root, 'ask/')}">Ask a question</a> form.</p>
   </div>
 </section>
