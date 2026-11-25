@@ -89,6 +89,8 @@ def load():
     for e in eps:
         if e.get("series") == "live" and e.get("date") and re.fullmatch(r"\s*ask away!?\s*live q&a!?\s*", e["title"], re.I):
             e["title"] = f"Ask Away! Live Q&A, {fmt_date(e['date'])}"
+        if e.get("site_title"):
+            e["title"] = f"{e['site_title']} ({fmt_date(e['date'])})" if e.get("date") else e["site_title"]
         base = slugify(e["title"]) or e["youtube"].lower()
         slug, n = base, 2
         while slug in seen:
@@ -509,6 +511,9 @@ def extra_sections(e, eps, root):
     p = parse_description(e)
     by_id = {x["youtube"]: x for x in eps}
     out = []
+    if e.get("topics"):
+        items = "".join(f"<li>{esc(k)}</li>" for k in e["topics"])
+        out.append(f'<section class="ep-sec"><h2>Topics discussed</h2><ul>{items}</ul></section>')
     if e.get("key_points"):
         items = "".join(f"<li>{esc(k)}</li>" for k in e["key_points"])
         out.append(f'<section class="ep-sec"><h2>Key takeaways</h2><ul>{items}</ul></section>')
