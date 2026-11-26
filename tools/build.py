@@ -818,8 +818,19 @@ def ask_page():
                 body, nav="ask")
 
 
-def ask_away_page():
+def ask_away_page(eps):
     root = "../"
+    latest = next((e for e in eps if e.get("series") == "live"), None)  # eps is newest first
+    latest_html = ""
+    if latest:
+        latest_html = f"""
+<section class="section ask-away-latest" aria-labelledby="latest-title">
+  <div class="wrap narrow">
+    <h2 id="latest-title">Watch the latest Ask Away</h2>
+    {video(latest)}
+    <p class="latest-title"><a href="{link(root, 'episodes/' + latest['slug'] + '/')}">{esc(latest.get('site_title') or latest['title'])}</a> · {esc(fmt_date(latest['date']))}</p>
+  </div>
+</section>"""
     body = f"""
 <section class="page-head">
   <div class="wrap narrow">
@@ -835,7 +846,7 @@ def ask_away_page():
   <div class="wrap">
     <img src="{root}assets/img/ask-away.jpg" width="1600" height="893" alt="Ask Away Live Q&amp;A: three hosts of Yet I Will Rejoice smiling in front of a bright LIVE graphic with chat bubbles and question marks" fetchpriority="high">
   </div>
-</section>
+</section>{latest_html}
 """
     ld = {"@context": "https://schema.org", "@type": "WebPage", "name": "Ask Away! Live Q&A",
           "url": SITE_URL + "/ask-away/",
@@ -955,7 +966,7 @@ def main():
     write("start/index.html", start_page(eps, series))
     write("about/index.html", about_page())
     write("ask/index.html", ask_page())
-    write("ask-away/index.html", ask_away_page())
+    write("ask-away/index.html", ask_away_page(eps))
     write("links/index.html", links_page(eps))
     write("privacy/index.html", privacy_page())
     write("404.html", not_found())

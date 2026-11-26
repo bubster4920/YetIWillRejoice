@@ -368,3 +368,5 @@ p:last-child { margin-bottom: 0; }
 
 .ask-away-art { background: var(--ink); padding: 0 0 clamp(48px, 7vw, 88px); }
 .ask-away-art img { display: block; width: 100%; height: auto; border-radius: 16px; }
+.ask-away-latest .latest-title { margin-top: 14px; color: var(--muted, #6b655c); }
+.ask-away-latest h2 { margin-bottom: 20px; }
