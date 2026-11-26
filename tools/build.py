@@ -817,6 +817,33 @@ def ask_page():
                 body, nav="ask")
 
 
+def ask_away_page():
+    root = "../"
+    body = f"""
+<section class="page-head">
+  <div class="wrap narrow">
+    <p class="eyebrow">Live on YouTube</p>
+    <h1>Ask Away! Live Q&amp;A</h1>
+    <p class="lede">Join us for our live Q&amp;A with Yet I Will Rejoice. Submit your questions, interact in the comments, and together we will learn and pursue what is true.</p>
+    <p class="lede"><strong>Every Monday night at 5:00 PM Mountain Time.</strong></p>
+    <div class="btn-row"><a class="btn btn-accent" href="{YOUTUBE_SUB}" target="_blank" rel="noopener">Subscribe on YouTube<span class="visually-hidden"> (opens in a new tab)</span></a></div>
+    <p class="small">Have a question ahead of time? <a href="{link(root, 'ask/')}">Submit it here</a>.</p>
+  </div>
+</section>
+<section class="ask-away-art">
+  <div class="wrap">
+    <img src="{root}assets/img/ask-away.jpg" width="1600" height="893" alt="Ask Away Live Q&amp;A: three hosts of Yet I Will Rejoice smiling in front of a bright LIVE graphic with chat bubbles and question marks" fetchpriority="high">
+  </div>
+</section>
+"""
+    ld = {"@context": "https://schema.org", "@type": "WebPage", "name": "Ask Away! Live Q&A",
+          "url": SITE_URL + "/ask-away/",
+          "description": "Weekly live Q&A with Yet I Will Rejoice, every Monday night at 5:00 PM Mountain Time on YouTube."}
+    return page(root, "ask-away/", "Ask Away! Live Q&A",
+                "Join the Yet I Will Rejoice live Q&A every Monday night at 5:00 PM Mountain Time on YouTube. Submit your questions and learn together.",
+                body, nav="ask", jsonld=ld, og_image=f"{SITE_URL}/assets/img/ask-away.jpg")
+
+
 def privacy_page():
     root = "../"
     body = f"""
@@ -927,10 +954,11 @@ def main():
     write("start/index.html", start_page(eps, series))
     write("about/index.html", about_page())
     write("ask/index.html", ask_page())
+    write("ask-away/index.html", ask_away_page())
     write("links/index.html", links_page(eps))
     write("privacy/index.html", privacy_page())
     write("404.html", not_found())
-    urls = ["", "start/", "episodes/", "about/", "ask/", "privacy/"] + [f"episodes/{e['slug']}/" for e in eps]
+    urls = ["", "start/", "episodes/", "about/", "ask/", "ask-away/", "privacy/"] + [f"episodes/{e['slug']}/" for e in eps]
     write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + "".join(f"  <url><loc>{SITE_URL}/{u}</loc></url>\n" for u in urls) + "</urlset>\n")
     write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")

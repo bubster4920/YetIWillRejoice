@@ -365,3 +365,6 @@ p:last-child { margin-bottom: 0; }
 .news-row input[type=email] { flex: 1 1 220px; min-width: 0; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--ink-3); background: var(--paper); color: var(--ink); font: inherit; }
 .news-note { margin: 8px 0 0; font-size: .85rem; opacity: .8; }
 .news-ok { margin: 10px 0 0; font-weight: 600; }
+
+.ask-away-art { background: var(--ink); padding: 0 0 clamp(48px, 7vw, 88px); }
+.ask-away-art img { display: block; width: 100%; height: auto; border-radius: 16px; }
