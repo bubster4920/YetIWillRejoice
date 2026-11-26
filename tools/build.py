@@ -847,6 +847,31 @@ def ask_away_page(eps):
     <img src="{root}assets/img/ask-away.jpg" width="1600" height="893" alt="Ask Away Live Q&amp;A: three hosts of Yet I Will Rejoice smiling in front of a bright LIVE graphic with chat bubbles and question marks" fetchpriority="high">
   </div>
 </section>{latest_html}
+<section class="section ask-away-hosts" aria-labelledby="hosts-title">
+  <div class="wrap">
+    <h2 id="hosts-title">Meet the hosts</h2>
+    <ul class="hosts-grid">
+      <li class="person">
+        <img src="{root}assets/img/brandon.jpg" alt="Brandon Anderson" width="640" height="800" loading="lazy">
+        <h3>Brandon Anderson</h3>
+        <p class="role">Youth pastor, Vista Grande Baptist Church</p>
+        <p>Brandon hosts Yet I Will Rejoice and leads the conversation each week. He founded Dare Ministries in 2015 to prepare young believers for a lifetime of ministry.</p>
+      </li>
+      <li class="person">
+        <img src="{root}assets/img/joshua.jpg" alt="Joshua Garner" width="640" height="800" loading="lazy">
+        <h3>Joshua Garner</h3>
+        <p class="role">Pastor, Springs Church</p>
+        <p>Joshua is a pastor at Springs Church and joins Brandon to take on the questions you send in.</p>
+      </li>
+      <li class="person">
+        <img src="{root}assets/img/green-hat-man.jpg" alt="Daniel Floring, the Green Hat Man" width="640" height="800" loading="lazy">
+        <h3>Daniel Floring</h3>
+        <p class="role">The Green Hat Man</p>
+        <p>Daniel is the glue that holds it all together.</p>
+      </li>
+    </ul>
+  </div>
+</section>
 """
     ld = {"@context": "https://schema.org", "@type": "WebPage", "name": "Ask Away! Live Q&A",
           "url": SITE_URL + "/ask-away/",

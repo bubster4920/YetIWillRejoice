@@ -370,3 +370,10 @@ p:last-child { margin-bottom: 0; }
 .ask-away-art img { display: block; width: 100%; height: auto; border-radius: 16px; }
 .ask-away-latest .latest-title { margin-top: 14px; color: var(--muted, #6b655c); }
 .ask-away-latest h2 { margin-bottom: 20px; }
+
+.hosts-grid { list-style: none; padding: 0; margin: 28px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); }
+.hosts-grid .person img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius); display: block; }
+.hosts-grid h3 { margin: 18px 0 4px; font-size: 1.35rem; }
+.hosts-grid .role { margin: 0 0 10px; font-weight: 600; color: var(--accent-dark, #8a6420); }
+.hosts-grid p:last-child { color: #3e3a33; margin: 0; }
+@media (max-width: 760px) { .hosts-grid { grid-template-columns: 1fr; max-width: 420px; } }
