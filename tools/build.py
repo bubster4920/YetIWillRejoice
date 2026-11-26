@@ -323,6 +323,7 @@ def page(root, path, title, description, body, nav="", og_image=None, jsonld=Non
       {nl('start', 'Start here', link(root, 'start/'))}
       {nl('episodes', 'Episodes', link(root, 'episodes/'))}
       {nl('about', 'About', link(root, 'about/'))}
+      {nl('askaway', 'Live Q&amp;A', link(root, 'ask-away/'))}
       {nl('ask', 'Ask a question', link(root, 'ask/'))}
       <a class="btn btn-small btn-accent" href="{GIVE}" target="_blank" rel="noopener">Give<span class="visually-hidden"> to Yet I Will Rejoice (opens in a new tab)</span></a>
       <a class="btn btn-small btn-light" href="#subscribe">Subscribe</a>
@@ -841,7 +842,7 @@ def ask_away_page():
           "description": "Weekly live Q&A with Yet I Will Rejoice, every Monday night at 5:00 PM Mountain Time on YouTube."}
     return page(root, "ask-away/", "Ask Away! Live Q&A",
                 "Join the Yet I Will Rejoice live Q&A every Monday night at 5:00 PM Mountain Time on YouTube. Submit your questions and learn together.",
-                body, nav="ask", jsonld=ld, og_image=f"{SITE_URL}/assets/img/ask-away.jpg")
+                body, nav="askaway", jsonld=ld, og_image=f"{SITE_URL}/assets/img/ask-away.jpg")
 
 
 def privacy_page():
