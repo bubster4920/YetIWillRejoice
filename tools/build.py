@@ -866,8 +866,8 @@ def ask_away_page(eps):
       <li class="person">
         <img src="{root}assets/img/green-hat-man.jpg" alt="Cartoon of Daniel Floring, the Green Hat Man, winking and giving a thumbs up" width="640" height="800" loading="lazy">
         <h3>Daniel Floring</h3>
-        <p class="role">The Green Hat Man</p>
-        <p>Daniel is the glue that holds it all together.</p>
+        <p class="role">Production manager, Woodmen Valley Chapel</p>
+        <p>Known as the Green Hat Man, Daniel is the glue that holds it all together.</p>
       </li>
     </ul>
   </div>
