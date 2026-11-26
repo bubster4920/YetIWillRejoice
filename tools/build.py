@@ -864,7 +864,7 @@ def ask_away_page(eps):
         <p>Joshua is a pastor at Springs Church and joins Brandon to take on the questions you send in.</p>
       </li>
       <li class="person">
-        <img src="{root}assets/img/green-hat-man.jpg" alt="Daniel Floring, the Green Hat Man" width="640" height="800" loading="lazy">
+        <img src="{root}assets/img/green-hat-man.jpg" alt="Cartoon of Daniel Floring, the Green Hat Man, winking and giving a thumbs up" width="640" height="800" loading="lazy">
         <h3>Daniel Floring</h3>
         <p class="role">The Green Hat Man</p>
         <p>Daniel is the glue that holds it all together.</p>
